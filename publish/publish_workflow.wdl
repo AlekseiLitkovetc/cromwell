@@ -2,7 +2,7 @@
 # Only handles strictly-increasing versions.
 # The current version is retrieved from the GitHub releases page.
 # If `majorRelease` is `false`, then `nextVersion = currentVersion + 0.1`.
-# If `majorRelease` is `true`, then `nextVersion = floor(currentVersion) + 1.0`.
+# If `majorRelease` is `true`, then `nextVersion = floor(currentVersion) + 1`.
 
 version 1.0
 
@@ -47,7 +47,7 @@ task doMajorRelease {
         echo 'Tag the release'
         git tag --message=~{releaseVersion} ~{releaseVersion}
 
-        echo 'Assemble jar for cromwell'
+        echo 'Assemble jars for cromwell and womtool'
         sbt -Dproject.version=~{releaseVersion} -Dproject.isSnapshot=false server/assembly womtool/assembly
 
         echo 'Create the hotfix branch'
@@ -148,14 +148,14 @@ task prepGithub {
         # Do not use `set -x` or it will print the GitHub token!
         set -euo pipefail
 
-        # Latest is the latest release by time, not version number.
-        # Instead, grab the first page of releases, then find the max release version from the returned results
-        # https://rosettacode.org/wiki/Determine_if_a_string_is_numeric
         curl \
             --fail --silent \
             https://api.github.com/repos/~{organization}/cromwell/releases \
         > releases.json
 
+        # Latest is the latest release by time, not version number.
+        # Instead, grab the first page of releases, then find the max release version from the returned results
+        # https://rosettacode.org/wiki/Determine_if_a_string_is_numeric
         jq \
             --raw-output --exit-status '
             def is_numeric:
@@ -164,7 +164,7 @@ task prepGithub {
             ' \
         < releases.json > version.txt
 
-        echo 'Verify that the token for the additional expected scopes that will be required later'
+        echo 'Verify that the token has the scopes that will be required later'
 
         curl \
             --fail --silent \
@@ -187,7 +187,7 @@ task prepGithub {
         done
 
         if [[ "${correct_scopes}" == true ]]; then
-            # Verify that at least one of the email scopes are present
+            # Verify that at least one of the email scopes is present
             correct_scopes=false
             for scope in "${email_scopes[@]}"; do
                 if grep -F " ${scope}" scopesHeader.txt; then
@@ -497,7 +497,7 @@ task releaseHomebrew {
         set -e
 
         if [[ "${install_exit_status}" -eq 0 && "${test_exit_status}" -eq 0 && "${audit_exit_status}" -eq 0 ]]; then
-            echo "Creating Homebew PR"
+            echo "Creating Homebrew PR"
             echo 'Download a template for the homebrew PR'
             curl \
                 --fail --silent \

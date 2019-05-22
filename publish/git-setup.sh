@@ -14,8 +14,8 @@ Usage: ${program} -t tokenFile -u user -e email [-n name] [-c credentialsFile]
 Options:
     -t|--tokenFile <tokenFile>             : A file containing the GitHub token (required)
     -u|--user <user>                       : The GitHub user name (required)
-    -n|--name <name>                       : The full name used for commits (optional)
     -e|--email <email>                     : The email used for commits (required)
+    -n|--name <name>                       : The full name used for commits (optional)
     -c|--credentialsFile <credentialsFile> : The path to store the credentials (default ./githubCredentials)
 USAGE
 }
@@ -24,8 +24,8 @@ credentialsFile="$PWD/githubCredentials"
 
 
 if ! OPTIONS=$(getopt -n "${program}" -o t:u:n:e:c: --long tokenFile:,user:,name:,email:,credentialsFile: -- "$@"); then
-    exit 1
     usage
+    exit 1
 fi
 
 eval set -- "${OPTIONS}"
@@ -35,8 +35,8 @@ do
     case "$1" in
         -t|--tokenFile       ) tokenFile="$2"; shift;;
         -u|--user            ) user="$2"; shift;;
-        -n|--name            ) name="$2"; shift;;
         -e|--email           ) email="$2"; shift;;
+        -n|--name            ) name="$2"; shift;;
         -c|--credentialsFile ) credentialsFile="$2"; shift;;
         --                   ) ;;
         *                    ) usage; exit 1;;
